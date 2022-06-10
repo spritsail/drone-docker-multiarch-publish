@@ -1,4 +1,4 @@
-FROM spritsail/alpine:3.15
+FROM alpine:3.16
 
 ARG VCS_REF
 ARG MANIFEST_VER="2.0.3"
