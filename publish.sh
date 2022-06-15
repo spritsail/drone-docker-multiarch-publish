@@ -16,40 +16,40 @@ if echo "$DRONE_COMMIT_MESSAGE" | grep -qiF -e "[PUBLISH SKIP]" -e "[SKIP PUBLIS
     exit 0
 fi
 
-# $PLUGIN_FROM_TEMPLATE Template to match the architecture images
-# $PLUGIN_FROM_USERNAME username of the source repository
-# $PLUGIN_FROM_PASSWORD password of the source repository
+# $PLUGIN_SRC_TEMPLATE Template to match the architecture images
+# $PLUGIN_SRC_USERNAME username of the source repository
+# $PLUGIN_SRC_PASSWORD password of the source repository
 # $PLUGIN_PLATFORMS Architectures to publish
-# $PLUGIN_TO_REPO  tag to this repo/repo to push to
-# $PLUGIN_TO_USERNAME username of the push repository
-# $PLUGIN_TO_PASSWORD password of the push repository
+# $PLUGIN_DEST_REPO  tag to this repo/repo to push to
+# $PLUGIN_DEST_USERNAME username of the push repository
+# $PLUGIN_DEST_PASSWORD password of the push repository
 # $PLUGIN_TAGS  newline or comma separated list of tags to push images with
 # $PLUGIN_INSECURE allow plain http requests to either registry
 
 
 # Set up the credential strings if present
-if [ -n "${PLUGIN_TO_USERNAME}" ]; then
-    if [ -z "${PLUGIN_TO_PASSWORD}" ]; then
+if [ -n "${PLUGIN_DEST_USERNAME}" ]; then
+    if [ -z "${PLUGIN_DEST_PASSWORD}" ]; then
       error "Missing password for 'to' username"
     fi
 
-    TO_CREDS="--dest-creds ${PLUGIN_TO_USERNAME}:${PLUGIN_TO_PASSWORD}"
+    DEST_CREDS="--dest-creds ${PLUGIN_DEST_USERNAME}:${PLUGIN_DEST_PASSWORD}"
 fi
 
-if [ -n "${PLUGIN_FROM_USERNAME}" ]; then
-    if [ -z "${PLUGIN_FROM_PASSWORD}" ]; then
+if [ -n "${PLUGIN_SRC_USERNAME}" ]; then
+    if [ -z "${PLUGIN_SRC_PASSWORD}" ]; then
       error "Missing password for 'from' username"
     fi
 
-    FROM_CREDS="--src-creds ${PLUGIN_FROM_USERNAME}:${PLUGIN_FROM_PASSWORD}"
+    SRC_CREDS="--src-creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
 fi
 
 # Check for the rest of the required env vars
-if [ -z "${PLUGIN_FROM_TEMPLATE}" ]; then
+if [ -z "${PLUGIN_SRC_TEMPLATE}" ]; then
     error "Missing required templated repo names for pushing"
 fi
 
-if [ -z "${PLUGIN_TO_REPO}" ]; then
+if [ -z "${PLUGIN_DEST_REPO}" ]; then
     error "missing 'repo' argument required for publishing"
 fi
 
@@ -64,7 +64,7 @@ if [ -n "${PLUGIN_INSECURE}" ]; then
 fi
 
 # Generate a random image name with latest tag to temporarily hold the manifest
-MANIFEST_REPO="${PLUGIN_FROM_TEMPLATE//ARCH/$(uuidgen)}"
+MANIFEST_REPO="${PLUGIN_SRC_TEMPLATE//ARCH/$(uuidgen)}"
 # Append a default tag if one isn't specified. manifest-tool requires a tag
 if echo "${MANIFEST_REPO##*/}" | grep -qv ':'; then
     MANIFEST_REPO="$MANIFEST_REPO:latest"
@@ -74,15 +74,15 @@ fi
 printf "Combining into '%s' with manifest-tool...\n" "${MANIFEST_REPO}"
 manifest-tool $MT_INSECURE push from-args \
     --platforms ${PLUGIN_PLATFORMS} \
-    --template ${PLUGIN_FROM_TEMPLATE} \
+    --template ${PLUGIN_SRC_TEMPLATE} \
     --target "${MANIFEST_REPO}"
 
 # Ensure at least one tag exists
 if [ -z "${PLUGIN_TAGS}" ]; then
     # Take into account the case where the repo already has the tag appended
-    if echo "${PLUGIN_TO_REPO}" | grep -q ':'; then
-        TAGS="${PLUGIN_TO_REPO#*:}"
-        PLUGIN_TO_REPO="${PLUGIN_TO_REPO%:*}"
+    if echo "${PLUGIN_DEST_REPO}" | grep -q ':'; then
+        TAGS="${PLUGIN_DEST_REPO#*:}"
+        PLUGIN_DEST_REPO="${PLUGIN_DEST_REPO%:*}"
     else
         # If none specified, assume 'latest'
         TAGS="latest"
@@ -98,9 +98,9 @@ for tag in $TAGS; do
     skopeo copy \
         --multi-arch all \
         ${SKOPEO_INSECURE} \
-        ${TO_CREDS} ${FROM_CREDS} \
+        ${DEST_CREDS} ${SRC_CREDS} \
         "docker://${MANIFEST_REPO}" \
-        "docker://${PLUGIN_TO_REPO}:$tag"
+        "docker://${PLUGIN_DEST_REPO}:$tag"
     printf "\n"
 done
 
