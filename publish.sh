@@ -1,6 +1,10 @@
 #!/bin/sh
-set -ex
+set -e
 set -o pipefail
+
+if [ -n "$DEBUG$PLUGIN_DEBUG" ]; then
+    set -x
+fi
 
 source tags.sh
 
