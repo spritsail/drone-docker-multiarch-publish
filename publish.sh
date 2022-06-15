@@ -21,10 +21,12 @@ if echo "$DRONE_COMMIT_MESSAGE" | grep -qiF -e "[PUBLISH SKIP]" -e "[SKIP PUBLIS
 fi
 
 # $PLUGIN_SRC_TEMPLATE Template to match the architecture images
+# $PLUGIN_SRC_REGISTRY source registry to pull the image from
 # $PLUGIN_SRC_USERNAME username of the source repository
 # $PLUGIN_SRC_PASSWORD password of the source repository
 # $PLUGIN_PLATFORMS Architectures to publish
 # $PLUGIN_DEST_REPO  tag to this repo/repo to push to
+# $PLUGIN_DEST_REGISTRY destination registry to push the image to
 # $PLUGIN_DEST_USERNAME username of the push repository
 # $PLUGIN_DEST_PASSWORD password of the push repository
 # $PLUGIN_TAGS  newline or comma separated list of tags to push images with
@@ -52,9 +54,15 @@ fi
 if [ -z "${PLUGIN_SRC_TEMPLATE}" ]; then
     error "Missing required templated repo names for pushing"
 fi
+if [ -n "${PLUGIN_SRC_REGISTRY}" ]; then
+    PLUGIN_SRC_TEMPLATE="$PLUGIN_SRC_REGISTRY/$PLUGIN_SRC_TEMPLATE"
+fi
 
 if [ -z "${PLUGIN_DEST_REPO}" ]; then
     error "missing 'repo' argument required for publishing"
+fi
+if [ -n "${PLUGIN_DEST_REGISTRY}" ]; then
+    PLUGIN_DEST_REPO="$PLUGIN_DEST_REGISTRY/$PLUGIN_DEST_REPO"
 fi
 
 if [ -z "${PLUGIN_PLATFORMS}" ]; then
