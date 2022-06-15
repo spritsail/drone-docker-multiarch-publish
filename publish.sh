@@ -34,7 +34,7 @@ if [ -n "${PLUGIN_TO_USERNAME}" ]; then
       error "Missing password for 'to' username"
     fi
 
-    TO_CREDS="--dest-creds=${PLUGIN_TO_USERNAME}:${PLUGIN_TO_PASSWORD}"
+    TO_CREDS="--dest-creds ${PLUGIN_TO_USERNAME}:${PLUGIN_TO_PASSWORD}"
 fi
 
 if [ -n "${PLUGIN_FROM_USERNAME}" ]; then
@@ -42,7 +42,7 @@ if [ -n "${PLUGIN_FROM_USERNAME}" ]; then
       error "Missing password for 'from' username"
     fi
 
-    FROM_CREDS="--src-creds=${PLUGIN_FROM_USERNAME}:${PLUGIN_FROM_PASSWORD}"
+    FROM_CREDS="--src-creds ${PLUGIN_FROM_USERNAME}:${PLUGIN_FROM_PASSWORD}"
 fi
 
 # Check for the rest of the required env vars
@@ -93,7 +93,7 @@ fi
 # Push all images with scopeo
 for tag in $TAGS; do
     printf "Pushing tag '%s'...\n" "$tag"
-    skopeo copy --multi-arch all $SKOPEO_INSECURE "${TO_CREDS}" "${FROM_CREDS}" "docker://${SRC_REPO}:latest" "docker://${PLUGIN_TO_REPO}:$tag"
+    skopeo copy --multi-arch all $SKOPEO_INSECURE ${TO_CREDS} ${FROM_CREDS} "docker://${SRC_REPO}:latest" "docker://${PLUGIN_TO_REPO}:$tag"
     printf "\n"
 done
 docker rmi "${SRC_REPO}" >/dev/null 2>/dev/null || true
