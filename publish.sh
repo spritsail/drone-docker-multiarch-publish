@@ -73,7 +73,7 @@ export SRC_REPO
 
 # Combine the architecture specific images with manifest-tool
 printf "Combining into '%s' with manifest-tool...\n" "${SRC_REPO}"
-manifest-tool $MT_INSECURE push from-args --platforms ${PLUGIN_PLATFORMS} --template ${PLUGIN_FROM_TEMPLATE} --target ${SRC_REPO}
+manifest-tool $MT_INSECURE push from-args --platforms ${PLUGIN_PLATFORMS} --template ${PLUGIN_FROM_TEMPLATE} --target "${SRC_REPO}:latest"
 
 # Ensure at least one tag exists
 if [ -z "${PLUGIN_TAGS}" ]; then
