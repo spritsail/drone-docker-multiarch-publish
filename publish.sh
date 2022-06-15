@@ -93,7 +93,7 @@ fi
 # Push all images with scopeo
 for tag in $TAGS; do
     printf "Pushing tag '%s'...\n" "$tag"
-    skopeo copy --multi-arch all $SKOPEO_INSECURE "${TO_CREDS}" "${FROM_CREDS}" "docker://${SRC_REPO}" "docker://${PLUGIN_TO_REPO}:$tag"
+    skopeo copy --multi-arch all $SKOPEO_INSECURE "${TO_CREDS}" "${FROM_CREDS}" "docker://${SRC_REPO}:latest" "docker://${PLUGIN_TO_REPO}:$tag"
     printf "\n"
 done
 docker rmi "${SRC_REPO}" >/dev/null 2>/dev/null || true
