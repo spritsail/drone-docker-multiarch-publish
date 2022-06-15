@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 set -o pipefail
 
 source tags.sh
