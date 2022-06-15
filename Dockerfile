@@ -12,7 +12,7 @@ LABEL maintainer="Spritsail <docker-plugin@spritsail.io>" \
 
 ADD *.sh /usr/local/bin/
 RUN chmod 755 /usr/local/bin/*.sh \
- && apk --no-cache add curl jq skopeo \
+ && apk --no-cache add curl jq skopeo uuidgen \
  && wget -O - https://github.com/estesp/manifest-tool/releases/download/v${MANIFEST_VER}/binaries-manifest-tool-${MANIFEST_VER}.tar.gz | tar -xz -C /usr/local/bin manifest-tool-linux-amd64 \
  && mv /usr/local/bin/manifest-tool-linux-amd64 /usr/local/bin/manifest-tool
 

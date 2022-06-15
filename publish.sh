@@ -16,7 +16,6 @@ if echo "$DRONE_COMMIT_MESSAGE" | grep -qiF -e "[PUBLISH SKIP]" -e "[SKIP PUBLIS
     exit 0
 fi
 
-# $PLUGIN_FROM_REPO name of the private combined repo
 # $PLUGIN_FROM_TEMPLATE Template to match the architecture images
 # $PLUGIN_FROM_USERNAME username of the source repository
 # $PLUGIN_FROM_PASSWORD password of the source repository
@@ -46,10 +45,6 @@ if [ -n "${PLUGIN_FROM_USERNAME}" ]; then
 fi
 
 # Check for the rest of the required env vars
-if [ -z "${PLUGIN_FROM_REPO}" ]; then
-    error "Missing required manifested repo name for pushing"
-fi
-
 if [ -z "${PLUGIN_FROM_TEMPLATE}" ]; then
     error "Missing required templated repo names for pushing"
 fi
@@ -59,7 +54,7 @@ if [ -z "${PLUGIN_TO_REPO}" ]; then
 fi
 
 if [ -z "${PLUGIN_PLATFORMS}" ]; then
-  # Default th x86 & arm64 if not specified
+  # Default to x86 & arm64 if not specified
   PLUGIN_PLATFORMS="linux/amd64,linux/arm64"
 fi
 
@@ -68,12 +63,19 @@ if [ -n "${PLUGIN_INSECURE}" ]; then
   SKOPEO_INSECURE="--src-tls-verify=false --dest-tls-verify=false"
 fi
 
-SRC_REPO="$PLUGIN_FROM_REPO"
-export SRC_REPO
+# Generate a random image name with latest tag to temporarily hold the manifest
+MANIFEST_REPO="${PLUGIN_FROM_TEMPLATE//ARCH/$(uuidgen)}"
+# Append a default tag if one isn't specified. manifest-tool requires a tag
+if echo "${MANIFEST_REPO##*/}" | grep -qv ':'; then
+    MANIFEST_REPO="$MANIFEST_REPO:latest"
+fi
 
 # Combine the architecture specific images with manifest-tool
-printf "Combining into '%s' with manifest-tool...\n" "${SRC_REPO}"
-manifest-tool $MT_INSECURE push from-args --platforms ${PLUGIN_PLATFORMS} --template ${PLUGIN_FROM_TEMPLATE} --target "${SRC_REPO}:latest"
+printf "Combining into '%s' with manifest-tool...\n" "${MANIFEST_REPO}"
+manifest-tool $MT_INSECURE push from-args \
+    --platforms ${PLUGIN_PLATFORMS} \
+    --template ${PLUGIN_FROM_TEMPLATE} \
+    --target "${MANIFEST_REPO}"
 
 # Ensure at least one tag exists
 if [ -z "${PLUGIN_TAGS}" ]; then
@@ -82,7 +84,7 @@ if [ -z "${PLUGIN_TAGS}" ]; then
         TAGS="${PLUGIN_TO_REPO#*:}"
         PLUGIN_TO_REPO="${PLUGIN_TO_REPO%:*}"
     else
-    # If none specified, assume 'latest'
+        # If none specified, assume 'latest'
         TAGS="latest"
     fi
 else
@@ -92,8 +94,14 @@ fi
 
 # Push all images with scopeo
 for tag in $TAGS; do
-    printf "Pushing tag '%s'...\n" "$tag"
-    skopeo copy --multi-arch all $SKOPEO_INSECURE ${TO_CREDS} ${FROM_CREDS} "docker://${SRC_REPO}:latest" "docker://${PLUGIN_TO_REPO}:$tag"
+    printf "Pushing manifest with tag '%s'...\n" "$tag"
+    skopeo copy \
+        --multi-arch all \
+        ${SKOPEO_INSECURE} \
+        ${TO_CREDS} ${FROM_CREDS} \
+        "docker://${MANIFEST_REPO}" \
+        "docker://${PLUGIN_TO_REPO}:$tag"
     printf "\n"
 done
-docker rmi "${SRC_REPO}" >/dev/null 2>/dev/null || true
+
+docker rmi "${MANIFEST_REPO}" >/dev/null 2>/dev/null || true
