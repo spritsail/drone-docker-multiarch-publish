@@ -46,7 +46,7 @@ if [ -n "${PLUGIN_SRC_USERNAME}" ]; then
     if [ -z "${PLUGIN_SRC_PASSWORD}" ]; then
       error "Missing password for 'from' username"
     fi
-
+    MT_CREDS="--username ${PLUGIN_SRC_USERNAME} --password ${PLUGIN_SRC_PASSWORD}"
     SRC_CREDS="--src-creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
 fi
 
@@ -84,7 +84,7 @@ fi
 
 # Combine the architecture specific images with manifest-tool
 printf "Combining into '%s' with manifest-tool...\n" "${MANIFEST_REPO}"
-manifest-tool $MT_INSECURE push from-args \
+manifest-tool $MT_CREDS $MT_INSECURE push from-args \
     --platforms ${PLUGIN_PLATFORMS} \
     --template ${PLUGIN_SRC_TEMPLATE} \
     --target "${MANIFEST_REPO}"
