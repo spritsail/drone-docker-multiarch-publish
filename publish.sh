@@ -82,11 +82,17 @@ if echo "${MANIFEST_REPO##*/}" | grep -qv ':'; then
     MANIFEST_REPO="$MANIFEST_REPO:latest"
 fi
 
+MANIFEST_TEMPLATE="${PLUGIN_SRC_TEMPLATE}"
+# Also append a default tag to the template if required.
+if echo "${MANIFEST_TEMPLATE##*/}" | grep -qv ':'; then
+    MANIFEST_TEMPLATE="$MANIFEST_TEMPLATE:latest"
+fi
+
 # Combine the architecture specific images with manifest-tool
 printf "Combining into '%s' with manifest-tool...\n" "${MANIFEST_REPO}"
 manifest-tool $MT_CREDS $MT_INSECURE push from-args \
     --platforms ${PLUGIN_PLATFORMS} \
-    --template ${PLUGIN_SRC_TEMPLATE} \
+    --template ${MANIFEST_TEMPLATE} \
     --target "${MANIFEST_REPO}"
 
 # Ensure at least one tag exists
