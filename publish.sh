@@ -121,8 +121,9 @@ else
 fi
 
 # Push all images with scopeo
+printf "Pushing manifest to '%s'...\n" "${PLUGIN_DEST_REPO}"
 for tag in $TAGS; do
-    printf "Pushing manifest with tag '%s'...\n" "$tag"
+    printf "Pushing tag '%s'...\n" "$tag"
     skopeo copy \
         --multi-arch all \
         ${SKOPEO_INSECURE} \
