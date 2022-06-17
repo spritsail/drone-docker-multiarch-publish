@@ -22,11 +22,13 @@ fi
 
 # $PLUGIN_SRC_TEMPLATE Template to match the architecture images
 # $PLUGIN_SRC_REGISTRY source registry to pull the image from
+# $PLUGIN_SRC_LOGIN    username:password of the source repository
 # $PLUGIN_SRC_USERNAME username of the source repository
 # $PLUGIN_SRC_PASSWORD password of the source repository
 # $PLUGIN_PLATFORMS Architectures to publish
 # $PLUGIN_DEST_REPO  tag to this repo/repo to push to
 # $PLUGIN_DEST_REGISTRY destination registry to push the image to
+# $PLUGIN_DEST_LOGIN    username:password of the push repository
 # $PLUGIN_DEST_USERNAME username of the push repository
 # $PLUGIN_DEST_PASSWORD password of the push repository
 # $PLUGIN_TAGS  newline or comma separated list of tags to push images with
@@ -34,20 +36,28 @@ fi
 
 
 # Set up the credential strings if present
-if [ -n "${PLUGIN_DEST_USERNAME}" ]; then
-    if [ -z "${PLUGIN_DEST_PASSWORD}" ]; then
-      error "Missing password for 'to' username"
+if [ -n "$PLUGIN_DEST_LOGIN" ]; then
+    DEST_CREDS="--dest-creds $PLUGIN_DEST_LOGIN"
+else
+    if [ -n "${PLUGIN_DEST_USERNAME}" ]; then
+        if [ -z "${PLUGIN_DEST_PASSWORD}" ]; then
+          error "Missing password for dest_username"
+        fi
+        DEST_CREDS="--dest-creds ${PLUGIN_DEST_USERNAME}:${PLUGIN_DEST_PASSWORD}"
     fi
-
-    DEST_CREDS="--dest-creds ${PLUGIN_DEST_USERNAME}:${PLUGIN_DEST_PASSWORD}"
 fi
 
-if [ -n "${PLUGIN_SRC_USERNAME}" ]; then
-    if [ -z "${PLUGIN_SRC_PASSWORD}" ]; then
-      error "Missing password for 'from' username"
+if [ -n "$PLUGIN_SRC_LOGIN" ]; then
+    MT_CREDS="--username ${PLUGIN_SRC_LOGIN%%:*} --password ${PLUGIN_SRC_LOGIN#*:}"
+    SRC_CREDS="--src-creds $PLUGIN_SRC_LOGIN"
+else
+    if [ -n "${PLUGIN_SRC_USERNAME}" ]; then
+        if [ -z "${PLUGIN_SRC_PASSWORD}" ]; then
+          error "Missing password for src_username"
+        fi
+        MT_CREDS="--username ${PLUGIN_SRC_USERNAME} --password ${PLUGIN_SRC_PASSWORD}"
+        SRC_CREDS="--src-creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
     fi
-    MT_CREDS="--username ${PLUGIN_SRC_USERNAME} --password ${PLUGIN_SRC_PASSWORD}"
-    SRC_CREDS="--src-creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
 fi
 
 # Check for the rest of the required env vars

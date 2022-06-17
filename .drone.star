@@ -33,9 +33,8 @@ def step(arch):
         "image": "spritsail/docker-publish",
         "settings": {
           "repo": "%s:%s" % (repo, arch),
-          "registry": {"from_secret": "docker_registry"},
-          "username": {"from_secret": "docker_username"},
-          "password": {"from_secret": "docker_password"},
+          "registry": {"from_secret": "registry_url"},
+          "login": {"from_secret": "registry_login"},
         },
         "when": {
           "branch": ["master"],
@@ -57,10 +56,12 @@ def publish(depends_on):
         "pull": "always",
         "settings": {
           "src_template": "%s:ARCH" % repo,
-          "src_registry": {"from_secret": "docker_registry"},
+          "src_registry": {"from_secret": "registry_url"},
+          "src_login": {"from_secret": "registry_login"},
+          "src_username": {"from_secret": "registry_username"},
+          "src_password": {"from_secret": "registry_password"},
           "dest_repo": repo,
-          "dest_username": {"from_secret": "docker_username"},
-          "dest_password": {"from_secret": "docker_password"},
+          "dest_login": {"from_secret": "docker_login"},
           "insecure": "true",
         },
         "when": {
