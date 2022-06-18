@@ -1,4 +1,5 @@
 #!/bin/sh
+# vim: ft=sh et sw=4
 set -e
 set -o pipefail
 
@@ -62,7 +63,11 @@ fi
 
 # Check for the rest of the required env vars
 if [ -z "${PLUGIN_SRC_TEMPLATE}" ]; then
-    error "Missing required templated repo names for pushing"
+    if [ -n "$DRONE_BUILD_NUMBER" ]; then
+        PLUGIN_SRC_TEMPLATE="drone/$DRONE_REPO/$DRONE_BUILD_NUMBER:OS-ARCH"
+    else
+        error "Missing required templated repo names for pushing"
+    fi
 fi
 if [ -n "${PLUGIN_SRC_REGISTRY}" ]; then
     PLUGIN_SRC_TEMPLATE="$PLUGIN_SRC_REGISTRY/$PLUGIN_SRC_TEMPLATE"

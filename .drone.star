@@ -14,7 +14,6 @@ def main(ctx):
   return builds
 
 def step(key, arch):
-  tmprepo = "drone/%s/${DRONE_BUILD_NUMBER}:%s" % (repo, arch)
   return {
     "kind": "pipeline",
     "name": key,
@@ -27,17 +26,13 @@ def step(key, arch):
         "name": "build",
         "image": "spritsail/docker-build",
         "pull": "always",
-        "settings": {
-          "repo": tmprepo,
-        },
       },
       {
         "name": "publish",
         "pull": "always",
         "image": "spritsail/docker-publish",
         "settings": {
-          "from": tmprepo,
-          "repo": tmprepo,
+          "repo":"drone/${DRONE_REPO}/${DRONE_BUILD_NUMBER}:${DRONE_STAGE_OS}-${DRONE_STAGE_ARCH}",
           "registry": {"from_secret": "registry_url"},
           "login": {"from_secret": "registry_login"},
         },
@@ -60,14 +55,12 @@ def publish(depends_on):
     "steps": [
       {
         "name": "publish",
-        "image": "registry.spritsail.io/drone/%s/${DRONE_BUILD_NUMBER}:${DRONE_STAGE_ARCH}" % repo,
+        # Publish manifest using the image we just built
+        "image": "registry.spritsail.io/drone/${DRONE_REPO}/${DRONE_BUILD_NUMBER}:${DRONE_STAGE_OS}-${DRONE_STAGE_ARCH}",
         "pull": "always",
         "settings": {
-          "src_template": "drone/%s/${DRONE_BUILD_NUMBER}:ARCH" % repo,
           "src_registry": {"from_secret": "registry_url"},
           "src_login": {"from_secret": "registry_login"},
-          "src_username": {"from_secret": "registry_username"},
-          "src_password": {"from_secret": "registry_password"},
           "dest_repo": repo,
           "dest_login": {"from_secret": "docker_login"},
         },
