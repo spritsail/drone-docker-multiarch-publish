@@ -64,7 +64,11 @@ fi
 # Check for the rest of the required env vars
 if [ -z "${PLUGIN_SRC_TEMPLATE}" ]; then
     if [ -n "$DRONE_BUILD_NUMBER" ]; then
-        PLUGIN_SRC_TEMPLATE="drone/$DRONE_REPO/$DRONE_BUILD_NUMBER:OS-ARCH"
+        if [ -n "$DOCKER_IMAGE_TOKEN" ]; then
+            PLUGIN_SRC_TEMPLATE="drone/$DRONE_REPO/$DRONE_BUILD_NUMBER/$DOCKER_IMAGE_TOKEN:OS-ARCH"
+        else
+            PLUGIN_SRC_TEMPLATE="drone/$DRONE_REPO/$DRONE_BUILD_NUMBER:OS-ARCH"
+        fi
     else
         error "Missing required templated repo names for pushing"
     fi
