@@ -97,7 +97,8 @@ if [ -n "${PLUGIN_INSECURE}" ]; then
 fi
 
 # Generate a random image name with latest tag to temporarily hold the manifest
-MANIFEST_REPO="${PLUGIN_SRC_TEMPLATE//ARCH/$(uuidgen)}"
+MANIFEST_REPO="${PLUGIN_SRC_TEMPLATE//ARCH/$(pwgen -snc 8 1)}"
+MANIFEST_REPO="${MANIFEST_REPO//OS/$(pwgen -snc 8 1)}"
 # Append a default tag if one isn't specified. manifest-tool requires a tag
 if echo "${MANIFEST_REPO##*/}" | grep -qv ':'; then
     MANIFEST_REPO="$MANIFEST_REPO:latest"
