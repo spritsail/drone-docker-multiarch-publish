@@ -88,10 +88,10 @@ parse_tags() {
                         ;;
 
                     # Fetch docker image label
-                    # usage: label <label-name> [image name=$SRC_REPO]
+                    # usage: label <label-name> [image name=$MANIFEST_REPO]
                     label)
                         [ $# -lt 1 ] && error "$cmd expects at least 1 argument"
-                        tags="$(docker inspect -f "{{ index .Config.Labels \"$1\" }}" "${2:-$SRC_REPO}")"
+                        tags="$(skopeo inspect ${SKOPEO_INSECURE} ${SKOPEO_CREDS} -f "{{ index .Labels \"$1\" }}" "docker://${2:-$MANIFEST_REPO}")"
                         ;;
 
                     # Load a tag from a file

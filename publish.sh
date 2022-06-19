@@ -38,7 +38,7 @@ fi
 
 # Set up the credential strings if present
 if [ -n "$PLUGIN_DEST_LOGIN" ]; then
-    DEST_CREDS="--dest-creds $PLUGIN_DEST_LOGIN"
+    DEST_CREDS="--dest-creds ${PLUGIN_DEST_LOGIN}"
 else
     if [ -n "${PLUGIN_DEST_USERNAME}" ]; then
         if [ -z "${PLUGIN_DEST_PASSWORD}" ]; then
@@ -50,7 +50,8 @@ fi
 
 if [ -n "$PLUGIN_SRC_LOGIN" ]; then
     MT_CREDS="--username ${PLUGIN_SRC_LOGIN%%:*} --password ${PLUGIN_SRC_LOGIN#*:}"
-    SRC_CREDS="--src-creds $PLUGIN_SRC_LOGIN"
+    SRC_CREDS="--src-creds ${PLUGIN_SRC_LOGIN}"
+    SKOPEO_CREDS="--creds ${PLUGIN_SRC_LOGIN}"
 else
     if [ -n "${PLUGIN_SRC_USERNAME}" ]; then
         if [ -z "${PLUGIN_SRC_PASSWORD}" ]; then
@@ -58,9 +59,10 @@ else
         fi
         MT_CREDS="--username ${PLUGIN_SRC_USERNAME} --password ${PLUGIN_SRC_PASSWORD}"
         SRC_CREDS="--src-creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
+        # Required for `tags` fetching labels from upstream manifest images
+        SKOPEO_CREDS="--creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
     fi
 fi
-
 # Check for the rest of the required env vars
 if [ -z "${PLUGIN_SRC_TEMPLATE}" ]; then
     if [ -n "$DRONE_BUILD_NUMBER" ]; then
@@ -125,6 +127,9 @@ if [ -z "${PLUGIN_TAGS}" ]; then
         TAGS="latest"
     fi
 else
+    # Required for `tags` fetching labels from upstream manifest images
+    export MANIFEST_REPO SKOPEO_CREDS SKOPEO_INSECURE
+
     # Parse and process dynamic tags
     TAGS="$(echo "${PLUGIN_TAGS}" | tr ',' '\n' | parse_tags | xargs -n 1 | sort -u | xargs)"
 fi
