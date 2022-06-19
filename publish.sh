@@ -147,4 +147,5 @@ for tag in $TAGS; do
     printf "\n"
 done
 
-docker rmi "${MANIFEST_REPO}" >/dev/null 2>/dev/null || true
+# Delete manifest from the temporary registry
+skopeo delete $SKOPEO_INSECURE $SKOPEO_CREDS "docker://${MANIFEST_REPO}" || :
