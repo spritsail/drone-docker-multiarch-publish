@@ -21,6 +21,8 @@ if echo "$DRONE_COMMIT_MESSAGE" | grep -qiF -e "[PUBLISH SKIP]" -e "[SKIP PUBLIS
     exit 0
 fi
 
+
+
 # $PLUGIN_SRC_TEMPLATE Template to match the architecture images
 # $PLUGIN_SRC_REGISTRY source registry to pull the image from
 # $PLUGIN_SRC_LOGIN    username:password of the source repository
@@ -63,6 +65,10 @@ else
         SKOPEO_CREDS="--creds ${PLUGIN_SRC_USERNAME}:${PLUGIN_SRC_PASSWORD}"
     fi
 fi
+
+# Lowercase DRONE_REPO to allow for using it in tagging
+DRONE_REPO=$(echo $DRONE_REPO | awk '{print tolower($0)}')
+
 # Check for the rest of the required env vars
 if [ -z "${PLUGIN_SRC_TEMPLATE}" ]; then
     if [ -n "$DRONE_BUILD_NUMBER" ]; then
