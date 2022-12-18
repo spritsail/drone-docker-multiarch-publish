@@ -3,11 +3,10 @@ FROM alpine:3.16
 ARG VCS_REF
 ARG MANIFEST_VER="2.0.3"
 
-LABEL maintainer="Spritsail <docker-plugin@spritsail.io>" \
-      org.label-schema.vendor="Spritsail" \
-      org.label-schema.name="docker-multiarch-publish" \
-      org.label-schema.description="A Drone CI plugin for tagging and pushing built multiarch Docker images" \
-      org.label-schema.version=${VCS_REF} \
+LABEL org.opencontainers.image.authors="Spritsail <docker-plugin@spritsail.io>" \
+      org.opencontainers.image.title="docker-multiarch-publish" \
+      org.opencontainers.image.description="A Drone CI plugin for tagging and pushing built multiarch Docker images" \
+      org.opencontainers.image.version=${VCS_REF} \
       io.spritsail.version.manifest-tool=${MANIFEST_VER}
 
 ADD *.sh /usr/local/bin/
