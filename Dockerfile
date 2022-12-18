@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM alpine:3.17
 
 ARG VCS_REF
 ARG MANIFEST_VER="2.0.3"
