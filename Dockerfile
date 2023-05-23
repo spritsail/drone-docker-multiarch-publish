@@ -1,7 +1,7 @@
 FROM alpine:3.18
 
 ARG VCS_REF
-ARG MANIFEST_VER="2.0.3"
+ARG MANIFEST_VER="2.0.8"
 
 LABEL org.opencontainers.image.authors="Spritsail <docker-plugin@spritsail.io>" \
       org.opencontainers.image.title="docker-multiarch-publish" \
