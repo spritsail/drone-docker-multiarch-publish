@@ -36,6 +36,7 @@ fi
 # $PLUGIN_DEST_PASSWORD password of the push repository
 # $PLUGIN_TAGS  newline or comma separated list of tags to push images with
 # $PLUGIN_INSECURE allow plain http requests to either registry
+# $PLUGIN_DELETE_SRC   delete the image from the source repository after publishing
 
 
 # Set up the credential strings if present
@@ -155,4 +156,7 @@ for tag in $TAGS; do
 done
 
 # Delete manifest from the temporary registry
-skopeo delete $SKOPEO_INSECURE $SKOPEO_CREDS "docker://${MANIFEST_REPO}" || :
+if [ -n "${PLUGIN_DELETE_SRC}" ]; then
+    printf "Deleting source image ${MANIFEST_REPO}"
+    skopeo delete $SKOPEO_INSECURE $SKOPEO_CREDS "docker://${MANIFEST_REPO}" || :
+fi
