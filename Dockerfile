@@ -9,9 +9,8 @@ LABEL org.opencontainers.image.authors="Spritsail <docker-plugin@spritsail.io>" 
       org.opencontainers.image.version=${VCS_REF} \
       io.spritsail.version.manifest-tool=${MANIFEST_VER}
 
-ADD *.sh /usr/local/bin/
-RUN chmod 755 /usr/local/bin/*.sh \
- && apk --no-cache add curl jq skopeo pwgen \
+ADD --chmod=755 *.sh /usr/local/bin/
+RUN apk --no-cache add curl jq skopeo pwgen \
  && wget -O - https://github.com/estesp/manifest-tool/releases/download/v${MANIFEST_VER}/binaries-manifest-tool-${MANIFEST_VER}.tar.gz | tar -xz -C /usr/local/bin manifest-tool-linux-amd64 \
  && mv /usr/local/bin/manifest-tool-linux-amd64 /usr/local/bin/manifest-tool
 
