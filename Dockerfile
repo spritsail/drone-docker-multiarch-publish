@@ -1,17 +1,14 @@
 FROM alpine:3.22
 
 ARG VCS_REF
-ARG MANIFEST_VER="2.1.7"
 
 LABEL org.opencontainers.image.authors="Spritsail <docker-plugin@spritsail.io>" \
       org.opencontainers.image.title="docker-multiarch-publish" \
       org.opencontainers.image.description="A Drone CI plugin for tagging and pushing built multiarch Docker images" \
-      org.opencontainers.image.version=${VCS_REF} \
-      io.spritsail.version.manifest-tool=${MANIFEST_VER}
+      org.opencontainers.image.version=${VCS_REF}
 
 ADD --chmod=755 *.sh /usr/local/bin/
-RUN apk --no-cache add curl jq skopeo pwgen \
- && wget -O - https://github.com/estesp/manifest-tool/releases/download/v${MANIFEST_VER}/binaries-manifest-tool-${MANIFEST_VER}.tar.gz | tar -xz -C /usr/local/bin manifest-tool-linux-amd64 \
- && mv /usr/local/bin/manifest-tool-linux-amd64 /usr/local/bin/manifest-tool
+RUN apk --no-cache add curl jq pwgen skopeo \
+ && apk --no-cache add --repository https://dl-cdn.alpinelinux.org/alpine/edge/testing manifest-tool
 
 ENTRYPOINT [ "/usr/local/bin/publish.sh" ]
